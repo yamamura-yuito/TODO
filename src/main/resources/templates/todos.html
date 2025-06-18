@@ -2,33 +2,121 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>TODOリスト</title>
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="/css/style.css" th:href="@{/css/style.css}">
 </head>
 <body>
-<div class="container">
-    <h1>TODOリスト</h1>
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">TODOリスト</h1>
 
-    <form th:action="@{/todos}" th:method="post">
-        <input type="text" name="title" placeholder="新しいTODOを入力" required/>
-        <button type="submit">追加</button>
+    <!-- TODO: フォームとリストの表示をここにBootstrapを使って改修 -->
+    <form th:action="@{/todos}" th:method="post" class="mb-4">
+        <div class="form-row">
+            <div class="col-md-6 form-group">
+                <label for="title">タイトル</label>
+                <input type="text" id="title" name="title" class="form-control" placeholder="新しいTODOを入力" required/>
+            </div>
+            <div class="col-md-3 form-group">
+                <label for="deadline">期限</label>
+                <input type="date" id="deadline" name="deadline" class="form-control"/>
+            </div>
+            <div class="col-md-3 form-group">
+                <label for="addStatus">ステータス</label>
+                <select id="addStatus" name="status" class="form-control">
+                    <!-- ステータスはコントローラーから渡されたもので動的に生成するが、create時はPENDING固定でも良い -->
+                    <!-- ここでは createTodo が status を PENDING 固定するので、フォームからは送信しないか、あるいはコントローラー側で status パラメータを受け取れるようにする必要がある -->
+                    <!-- 今回のコントローラーの createTodo は status を引数に取らないので、このフィールドは新規作成時には不要かもしれない -->
+                    <!-- もし新規作成時にステータスを指定させたい場合は、ControllerのcreateTodoメソッドも修正が必要 -->
+                     <option th:each="stat : ${statuses}" th:value="${stat.name()}" th:text="${stat.displayName}" th:selected="${stat.name() == 'PENDING'}">未着手</option>
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">追加</button>
     </form>
 
-    <div th:if="${todos == null || todos.isEmpty()}">
-        <p class="empty-message">TODOアイテムはまだありません。上から追加してください！</p>
+    <div th:if="${todos == null || todos.isEmpty()}" class="alert alert-info text-center">
+        TODOアイテムはまだありません。上から追加してください！
     </div>
 
-    <ul th:if="${todos != null && !todos.isEmpty()}">
-        <li th:each="todo : ${todos}">
-            <input type="checkbox" th:checked="${todo.completed}"
-                   th:onclick="'window.location.href=\'' + @{/todos/{id}/toggle(id=${todo.id})} + '\''" />
-            <span th:text="${todo.title}" class="todo-title" th:classappend="${todo.completed} ? 'completed' : ''">Todo Title</span>
-            <div class="actions">
-                <a th:href="@{/todos/{id}/toggle(id=${todo.id})}">状態切替</a>
-                <a th:href="@{/todos/{id}/delete(id=${todo.id})}" class="delete">削除</a>
+    <ul class="list-group" th:if="${todos != null && !todos.isEmpty()}">
+        <li th:each="todo : ${todos}" class="list-group-item"
+            th:classappend="${todo.status.name() == 'COMPLETED' ? 'list-group-item-success' : (todo.status.name() == 'CANCELLED' ? 'list-group-item-light text-muted' : '')}">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1" th:text="${todo.title}" th:classappend="${todo.status.name() == 'COMPLETED' || todo.status.name() == 'CANCELLED' ? 'text-decoration-line-through' : ''}">Todo Title</h5>
+                <small th:text="${#temporals.format(todo.deadline, 'yyyy-MM-dd')}" th:if="${todo.deadline != null}">期限</small>
+            </div>
+            <p class="mb-1">
+                <span th:text="${todo.status.displayName}" class="badge"
+                      th:classappend="${todo.status.name() == 'PENDING' ? 'badge-secondary' :
+                                     (todo.status.name() == 'IN_PROGRESS' ? 'badge-primary' :
+                                     (todo.status.name() == 'COMPLETED' ? 'badge-success' : 'badge-danger'))}">ステータス</span>
+            </p>
+            <div class="actions mt-2">
+                <a th:href="@{/todos/{id}/toggleStatus(id=${todo.id})}" class="btn btn-sm btn-info mr-1">次の状態へ</a>
+                <!-- 詳細更新ボタン（モーダル用） -->
+                <button type="button" class="btn btn-sm btn-warning mr-1" data-toggle="modal" th:attr="data-target='#updateTodoModal-' + ${todo.id}">
+                    更新
+                </button>
+                <a th:href="@{/todos/{id}/delete(id=${todo.id})}" class="btn btn-sm btn-danger">削除</a>
+            </div>
+
+            <!-- 更新用モーダル -->
+            <div class="modal fade" th:id="'updateTodoModal-' + ${todo.id}" tabindex="-1" role="dialog" th:aria-labelledby="'updateTodoModalLabel-' + ${todo.id}" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <form th:action="@{/todos/{id}/updateDetails(id=${todo.id})}" method="post">
+                            <div class="modal-header">
+                                <h5 class="modal-title" th:id="'updateTodoModalLabel-' + ${todo.id}">TODO更新</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label th:for="'title-' + ${todo.id}">タイトル</label>
+                                    <input type="text" th:id="'title-' + ${todo.id}" name="title" class="form-control" th:value="${todo.title}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label th:for="'deadline-' + ${todo.id}">期限</label>
+                                    <input type="date" th:id="'deadline-' + ${todo.id}" name="deadline" class="form-control" th:value="${todo.deadline != null ? #temporals.format(todo.deadline, 'yyyy-MM-dd') : ''}">
+
+                                </div>
+                                 <div class="form-group">
+                                    <label th:for="'status-' + ${todo.id}">ステータス</label>
+                                    <select th:id="'status-' + ${todo.id}" name="status" class="form-control">
+                                        <option th:each="stat : ${statuses}"
+                                                th:value="${stat.name()}"
+                                                th:text="${stat.displayName}"
+                                                th:selected="${stat == todo.status}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">閉じる</button>
+                                <button type="submit" class="btn btn-primary">保存</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </li>
     </ul>
 </div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"
+        integrity="sha384-pzjw8f+ua7Kw1TIq0v8FqFjcJ6pajs/rfdfs3SO+kAx2jc5Pv5BvAwhGk3qXpnpJ"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
 </body>
 </html>

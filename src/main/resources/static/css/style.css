@@ -1,118 +1,100 @@
+/* style.css */
+
+/* Body styles - Bootstrap provides its own defaults, customize if needed beyond Bootstrap */
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 20px;
-    color: #333;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start; /* Align items to the top */
-    min-height: 100vh;
+    font-family: 'Arial', sans-serif; /* Example: Keep custom font if Bootstrap's default is not desired */
+    background-color: #f8f9fa; /* A slightly lighter gray than default Bootstrap for contrast if needed */
+    /* margin and padding are generally handled by Bootstrap containers/components */
+    /* display: flex properties for centering the container can be done with Bootstrap utilities on a wrapper div if needed */
 }
 
-.container {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 600px; /* Max width of the container */
+/* Custom container styling if Bootstrap's .container is not sufficient */
+/* For example, if you need a different max-width or specific padding not achievable with Bootstrap utilities */
+/* .custom-container {
+    max-width: 720px;
+    margin-top: 30px;
+    padding: 25px;
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+} */
+
+/* Heading customization - complement or override Bootstrap */
+h1.page-title { /* Example: if you want a specific style for H1 not covered by Bootstrap utilities */
+    color: #495057; /* Darker gray for emphasis */
+    margin-bottom: 1.5rem; /* Default is mb-3 or mb-4 usually */
 }
 
-h1 {
-    color: #333;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-form {
-    display: flex;
-    margin-bottom: 20px;
-}
-
-form input[type="text"] {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-}
-
-form button {
-    padding: 10px 15px;
-    background-color: #5cb85c;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    margin-left: 10px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-form button:hover {
-    background-color: #4cae4c;
-}
-
-ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-li {
-    padding: 12px 15px;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+/* Specific adjustments for list items if needed beyond Bootstrap's list-group-item */
+.list-group-item {
+    /* transition for hover effects can be kept if desired */
     transition: background-color 0.2s ease-in-out;
 }
 
-li:last-child {
-    border-bottom: none;
+.list-group-item:hover {
+    background-color: #e9ecef; /* Slightly darker hover for list items */
 }
 
-li:hover {
-    background-color: #f9f9f9;
+/* Custom styling for todo title if Bootstrap text utilities are not enough */
+.todo-title-custom {
+    font-weight: 500; /* Slightly bolder title */
 }
 
-.todo-title {
-    flex-grow: 1;
-    margin-left: 10px;
-    font-size: 16px;
+/* Completed or Cancelled style for title - text-decoration-line-through is already applied via th:classappend */
+/* .todo-title.completed, .todo-title.cancelled {
+    color: #6c757d;
+} */
+
+/* Action buttons/links specific tweaks */
+.actions .btn {
+    /* margin-right: 0.5rem; /* Spacing between buttons */
+    /* Ensure buttons in actions div are consistently sized if needed */
+}
+.actions .btn-sm {
+    padding: 0.2rem 0.4rem; /* Slightly smaller padding for very small buttons */
+    font-size: 0.8em;
 }
 
-.todo-title.completed {
-    text-decoration: line-through;
-    color: #aaa;
-}
 
-.actions a {
-    text-decoration: none;
-    color: #007bff;
-    margin-left: 10px;
-    font-size: 14px;
-}
+/* Empty message styling if Bootstrap's alert classes are not used or need override */
+/* .empty-message-custom {
+    color: #6c757d;
+    padding: 2rem;
+    font-style: italic;
+} */
 
-.actions a.delete {
-    color: #dc3545;
-}
-
-.actions a:hover {
-    text-decoration: underline;
-}
-
-.empty-message {
-    text-align: center;
-    color: #777;
-    padding: 20px;
-    font-size: 16px;
-}
-
-/* Checkbox styling */
-input[type="checkbox"] {
+/* Remove or comment out checkbox styling as Bootstrap handles forms */
+/* input[type="checkbox"] {
     margin-right: 10px;
-    width: 18px; /* Custom width */
-    height: 18px; /* Custom height */
+    width: 18px;
+    height: 18px;
     cursor: pointer;
+} */
+
+/* General text utility classes (Bootstrap has these, so only for overrides) */
+.text-decoration-line-through {
+    text-decoration: line-through;
+}
+
+/* Custom badge styling if needed */
+.badge-custom-pending {
+    background-color: #6c757d; /* Bootstrap's secondary */
+    color: white;
+}
+.badge-custom-in-progress {
+    background-color: #007bff; /* Bootstrap's primary */
+    color: white;
+}
+.badge-custom-completed {
+    background-color: #28a745; /* Bootstrap's success */
+    color: white;
+}
+.badge-custom-cancelled {
+    background-color: #dc3545; /* Bootstrap's danger */
+    color: white;
+}
+
+/* Ensure modal content is appropriately styled if defaults are not enough */
+.modal-body .form-group label {
+    font-weight: bold;
 }
